@@ -1,6 +1,6 @@
 /*
  * xdg-autostart
- * Copyright (c) 2011-2014 Fabrice THIROUX <fabrice.thiroux@free.fr>.
+ * Copyright (c) 2011-2016 Fabrice THIROUX <fabrice.thiroux@free.fr>.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -28,8 +28,10 @@ struct DesktopFileInfo {
 
 class DesktopFileUtils
 {
-	// Returns true if Hidden is set in KeyFile, false otherwise.
-	protected static bool is_hidden(GLib.KeyFile kf)
+	/**
+	* Returns true if Hidden is set in KeyFile, false otherwise.
+	**/
+	private static bool Hidden(GLib.KeyFile kf)
 	{
 		try
 		{
@@ -43,10 +45,11 @@ class DesktopFileUtils
 		return false;
 	}
 
-
-	// Returns true if 'desktop' appears if OnlyShowIn or not in NotShowIn
-	// or if none of these keys are set.
-	protected static bool is_visible(GLib.KeyFile kf, string desktop)
+	/**
+	* Returns true if 'desktop' appears in OnlyShowIn or not in NotShowIn
+	* or if none of these keys are set.
+	**/
+	private static bool Visible(GLib.KeyFile kf, string desktop)
 	{
 		bool found = false;
 		string[] show_list;
@@ -65,6 +68,7 @@ class DesktopFileUtils
 						break;
 					}
 				}
+				
 				/* Current desktop is not found in the OnlyShowIn list */
 				if (found == false)
 				{
@@ -86,23 +90,29 @@ class DesktopFileUtils
 				}
 			}
 		}
-		catch (KeyFileError e) {
-			warning ("KeyFileError: %s\n", e.message);
+		catch (KeyFileError e)
+		{
+			warning("KeyFileError: %s\n", e.message);
 		}
 		return true;
 	}
 
-	// Get Exec field. Returns null if TryExec fails or if Exec is not set
-	protected static string? get_exec(GLib.KeyFile kf)
+	/** 
+	* Returns null if TryExec fails or if Exec is not set
+	**/
+	private static string? Exec(GLib.KeyFile kf)
 	{
 		string? tryexec;
 
-		try {
+		try
+		{
 			/* Lookup for TryExec file and check if it's found in path */
 			if (kf.has_key("Desktop Entry", "TryExec")) {
 				tryexec = kf.get_string("Desktop Entry", "TryExec");
-				if (tryexec != null) {
-					if (Environment.find_program_in_path (tryexec) == null) {
+				if (tryexec != null)
+				{
+					if (Environment.find_program_in_path (tryexec) == null)
+					{
 						message("Can't find %s from TryExec key, aborting.", tryexec);
 						return null; // Exec is not found in path => exit
 					}
@@ -110,15 +120,18 @@ class DesktopFileUtils
 			}
 			return kf.get_string ("Desktop Entry", "Exec");
 		}
-		catch (KeyFileError e) {
+		catch (KeyFileError e)
+		{
 			warning("KeyFileError: %s\n", e.message);
 		}
 
 		return null;
 	}
 
-	// Returns X-GNOME-Autostart-Delay value or 0.
-	protected static int get_delay(GLib.KeyFile kf)
+	/**
+	* Returns X-GNOME-Autostart-Delay value or 0.
+	**/
+	private static int Delay(GLib.KeyFile kf)
 	{
 		try
 		{
@@ -135,93 +148,76 @@ class DesktopFileUtils
 		return 0;
 	}
 
-	// Return a DesktopFileInfo struct containing Exec and Delay fields.
+	/**
+	* Returns a DesktopFileInfo struct containing Exec and Delay fields.
+	*/
 	public static DesktopFileInfo? get_info(string filename, string desktop)
 	{
-		GLib.KeyFile kf =new KeyFile();
-		DesktopFileInfo info = DesktopFileInfo();
+		GLib.KeyFile kf = new KeyFile();
 
-		try {
-			if (kf.load_from_file (filename, KeyFileFlags.NONE)) {
-
-				if (DesktopFileUtils.is_hidden(kf) == true)
+		try
+		{
+			if (kf.load_from_file (filename, KeyFileFlags.NONE))
+			{	
+				// We don't care about hidden or not visible app.							
+				if (DesktopFileUtils.Hidden(kf) == true)
 					return null;
 
-				if (!DesktopFileUtils.is_visible(kf, desktop))
+				if (!DesktopFileUtils.Visible(kf, desktop))
 					return null;
 
-				info.exec = DesktopFileUtils.get_exec(kf);
-
+				// So far so good. let's create a new DesktopFileInfo struct.
+				DesktopFileInfo info = DesktopFileInfo() {
+					exec = DesktopFileUtils.Exec(kf),
+					delay = DesktopFileUtils.Delay(kf)
+				};
+				
+				// Useless if Exec is null.
 				if (info.exec == null)
 					return null;
 
-				info.delay = DesktopFileUtils.get_delay(kf);
 				return info;
 			}
 		}
-		catch (KeyFileError e) {
-			warning ("Error: %s\n", e.message);
+		catch (KeyFileError e)
+		{
+			warning("Error: %s\n", e.message);
 		}
 		return null;
 	}
 }
 
 
-class Autostart
+class XDG
 {
-	static string desktop;
-	static SList<DesktopFileInfo?> desktopfileinfos;
-	static int loop_count = 0;		// counter for the seconds
-	static int max_delay = 0;		// max execution time
-	static MainLoop loop;				// GLib loop
+	int seconds = 0;
+	MainLoop main_loop;
+	private string desktop;
+	SList<DesktopFileInfo?> dfi_files = new SList<DesktopFileInfo?>();
+	
 
-	private static bool timer_cb()
+	public XDG(string desktop)
 	{
-		foreach (DesktopFileInfo? info in desktopfileinfos)
+		this.desktop = desktop;
+		
+		// Contains <Filename, FullPath>
+		HashTable<string, string> table = new HashTable<string, string> (str_hash, str_equal);
+		
+		foreach (string dir in Environment.get_system_config_dirs())
 		{
-			if (info.delay == loop_count)
-			{
-				try {
-					message("Launching: %s (delay %d)", info.exec, loop_count);
-					Process.spawn_command_line_async (info.exec);
-				}
-				catch (SpawnError e) {
-					warning("Error launching: %s\n", e.message);
-				}
-			}
+			get_desktopfiles_from_dir(table, dir);
 		}
-
-		stdout.flush();
-
-		loop_count++;
-
-		if (loop_count > max_delay)
-		{
-			loop.quit();
-			return false;
-		}
-		else
-			return true;
+		
+		get_desktopfiles_from_dir(table, Environment.get_user_config_dir ());
+		
+		convert_table_to_DesktopFileInfos(table);	
 	}
-
-
-	static void launch_file(string key, string filename)
-	{
-		DesktopFileInfo? info = DesktopFileUtils.get_info(filename, desktop);
-		if (info != null)
-		{
-			//stdout.printf("adding %s\n", info.exec);
-			desktopfileinfos.append(info);
-
-			if (info.delay > max_delay)
-			{
-				max_delay = info.delay;
-			}
-		}
-	}
-
-
-	static void get_files_in_dir(HashTable<string, string> table, string directory)
+	
+	
+	/**
+	* List all desktop file from directory, put their names and fullpath in the HashTable table
+	*/
+	private void get_desktopfiles_from_dir(HashTable<string, string> table, string directory)
 	{
 		unowned string filename;
 		string dir_path = Path.build_filename(directory, "autostart");
@@ -238,40 +234,72 @@ class Autostart
 				}
 			}
 		}
-		catch (FileError e) {
-			warning ("Error: %s\n", e.message);
+		catch (FileError e)
+		{
+			warning("Error: %s\n", e.message);
 		}
 	}
+	
+	
+	private void convert_table_to_DesktopFileInfos(HashTable<string, string> table)
+	{
+		table.foreach((k,v) =>
+		{
+			DesktopFileInfo? r = DesktopFileUtils.get_info(v, desktop);
+			if (r != null)
+			{
+				dfi_files.append(r);
+			}
+		});
+	}
+	
+	/**
+	* Launch applications every timer pulse.
+	**/
+	private bool timer_cb()
+	{
+		dfi_files.foreach((x) =>
+			{
+				if (x.delay == seconds)
+					{
+					try {
+						message("Launching: %s (delay %d)", x.exec, seconds);
+						Process.spawn_command_line_async (x.exec);
+						dfi_files.remove(x);
+					}
+					catch (SpawnError e)
+					{
+						warning("Error launching: %s\n", e.message);
+					}
+				}
+			}
+		);
 
+		// There is no more application to launch	
+		if (dfi_files.length() == 0) {
+			main_loop.quit();
+			return false;			
+		}
+		
+		seconds++;
+		return true;
+	}
+	
+	
+	public void Launch()
+	{
+		main_loop = new MainLoop ();
+		GLib.Timeout.add_seconds (1, timer_cb);
+		main_loop.run ();
+	}
+}
 
+class Autostart
+{
 	static int main(string[] args)
 	{
-		HashTable<string, string> desktop_files = new HashTable<string, string> (str_hash, str_equal);
-		weak string[] dirs = Environment.get_system_config_dirs();
-
-		if (args.length > 1)
-		{
-			desktop = args[1];
-		}
-		else
-		{
-			desktop = "Openbox";
-		}
-
-		foreach (string dir in dirs)
-		{
-			get_files_in_dir(desktop_files, dir);
-		}
-
-		get_files_in_dir(desktop_files, Environment.get_user_config_dir ());
-
-		if (desktop_files.size() > 0)
-		{
-			desktop_files.for_each(launch_file);
-			loop = new MainLoop ();
-			GLib.Timeout.add_seconds (1, timer_cb);
-			loop.run ();
-		}
+		var xdg = new XDG((args.length > 1) ? args[1] : "Openbox");
+		xdg.Launch();
 
 		return 0;
 	}
