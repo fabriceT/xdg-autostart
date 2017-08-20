@@ -1,0 +1,10 @@
+1. Build with make
+
+type 'make' and voilà.
+
+2. Building with meson and ninja.
+
+$ mkdir build
+$ cd build
+$ meson ..
+$ ninja
