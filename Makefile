@@ -1,8 +1,13 @@
 all: xdg-autostart strip
 
-xdg-autostart: xdg-autostart.vala
+SRC= AutostartInfoBuilder.vala\
+     App.vala\
+     DirectoryReader.vala\
+     ProgramLauncher.vala
+
+xdg-autostart: $(SRC)
 	@echo "Compiling $<"
-	@valac xdg-autostart.vala
+	@valac -o xdg-autostart $(SRC)
 	# Debug
 	#@valac -g xdg-autostart.vala --save-temps
 
