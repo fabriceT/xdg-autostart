@@ -25,7 +25,7 @@ class App {
         desktop_name = name;
     }
 
-    public void run(bool dry_run) {
+    public int run(bool dry_run) {
         var reader = new DirectoryReader();
         var builder = new AutostartInfoBuilder(desktop_name);
         var launcher = new ProgramLauncher(dry_run);
@@ -36,7 +36,7 @@ class App {
             launcher.add(builder.build(filename));
         }
 
-        launcher.launch();
+        return launcher.launch();
     }
 }
 
@@ -78,8 +78,6 @@ public int main(string[] args)
         return 1;
     }
 
-    new App(desktop).run(dry_run);
-
-    return 0;
+    return new App(desktop).run(dry_run);
 }
 

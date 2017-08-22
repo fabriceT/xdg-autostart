@@ -63,13 +63,15 @@ class ProgramLauncher {
         return true;
     }
 
-    public void launch() {
+    public int launch() {
         // Speed it up when in dry run mode.
         var delay = (dry_run) ? 0 : 1;
 
         main_loop = new MainLoop();
         GLib.Timeout.add_seconds (delay, runner);
         main_loop.run ();
+
+        return 0;
     }
 }
 
