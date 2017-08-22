@@ -1,6 +1,7 @@
 all: xdg-autostart strip
 
 SRC= AutostartInfoBuilder.vala\
+     AutostartInfo.vala\
      App.vala\
      DirectoryReader.vala\
      ProgramLauncher.vala

@@ -4,6 +4,10 @@ glib = dependency('glib-2.0')
 gobject = dependency('gobject-2.0')
 
 executable('xdg-autostart',
-  ['AutostartInfoBuilder.vala', 'App.vala', 'DirectoryReader.vala', 'ProgramLauncher.vala'],
+  [ 'AutostartInfoBuilder.vala',
+    'AutostartInfo.vala',
+    'App.vala',
+    'DirectoryReader.vala',
+    'ProgramLauncher.vala'],
   dependencies: [glib, gobject]
 )
