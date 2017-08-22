@@ -1,7 +1,12 @@
 class ProgramLauncher {
     private int seconds = 0;
+    private bool dry_run;
     private MainLoop main_loop;
     private List<AutostartInfo?> files = new List<AutostartInfo?>();
+
+    public ProgramLauncher(bool dry_run) {
+        this.dry_run = dry_run;
+    }
 
     public void add(AutostartInfo file) {
         if (file.is_launchable()) {
@@ -13,11 +18,14 @@ class ProgramLauncher {
         files.foreach((x) => {
             if (x.delay == seconds) {
                 try {
-                    message("Launching: %s (delay: %d, file: %s)",
-                            x.executable,
+                    if (dry_run) {
+                        message("Time: %d sec. - %s (filename: %s)",
                             seconds,
+                            x.executable,
                             x.filename);
-                    Process.spawn_command_line_async (x.executable);
+                    } else {
+                        Process.spawn_command_line_async (x.executable);
+                    }
                 }
                 catch (SpawnError e) {
                     warning("Error launching: %s\n", e.message);
@@ -38,8 +46,11 @@ class ProgramLauncher {
     }
 
     public void launch() {
+        // Speed it up when in dry run mode.
+        var delay = (dry_run) ? 0 : 1;
+
         main_loop = new MainLoop();
-        GLib.Timeout.add_seconds (1, runner);
+        GLib.Timeout.add_seconds (delay, runner);
         main_loop.run ();
     }
 }
