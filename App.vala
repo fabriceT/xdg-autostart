@@ -18,6 +18,9 @@
 
 using GLib;
 
+//[CCode(cname="GETTEXT_PACKAGE")] extern const string GETTEXT_PACKAGE;
+//[CCode(cname="LOCALEDIR")] extern const string LOCALEDIR;
+
 class App {
     private string desktop_name;
 
@@ -41,11 +44,17 @@ class App {
 }
 
 
-
 public int main(string[] args)
 {
     bool dry_run = false;
     string desktop = "Openbox";
+
+    message("%s", Config.VERSION);
+
+    GLib.Intl.setlocale(GLib.LocaleCategory.ALL, "");
+    GLib.Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
+    GLib.Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
+    GLib.Intl.textdomain (Config.GETTEXT_PACKAGE);
 
     try {
         GLib.OptionEntry[] options = {
@@ -55,7 +64,7 @@ public int main(string[] args)
                 flags = 0,
                 arg = GLib.OptionArg.NONE,
                 arg_data = &dry_run,
-                description = "Perform a test.",
+                description = _("Perform a test."),
                 arg_description = null },
             GLib.OptionEntry () {
                 long_name = "desktop",
@@ -63,7 +72,7 @@ public int main(string[] args)
                 flags = 0,
                 arg = GLib.OptionArg.STRING,
                 arg_data = &desktop,
-                description = "Desktop name",
+                description = _("Desktop name"),
                 arg_description = null },
             GLib.OptionEntry ()
         };
@@ -72,7 +81,8 @@ public int main(string[] args)
         opt_context.set_help_enabled(true);
         opt_context.add_main_entries(options, null);
         opt_context.parse(ref args);
-    } catch (OptionError e) {
+    }
+    catch (OptionError e) {
         stdout.printf("error: %s\n", e.message);
         stdout.printf("Run '%s --help' to view a full list of available command line pass_options\n", args[0]);
         return 1;

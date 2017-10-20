@@ -1,10 +1,7 @@
-1. Build with make
+Building xdg-autostart from scratch in 4 steps
 
-type 'make' and voilà.
+  1. mkdir build
+  2. cd build
+  3. meson ..
+  4. ninja  
 
-2. Building with meson and ninja.
-
-$ mkdir build
-$ cd build
-$ meson ..
-$ ninja
