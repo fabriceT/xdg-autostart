@@ -23,12 +23,15 @@ using GLib;
 
 class App {
     private string desktop_name;
+    public bool verbose = false;
+    public bool dry_run = false;
 
     public App(string name) {
+        stdout.printf(@"Setting desktop name to $name\n");
         desktop_name = name;
     }
 
-    public int run(bool dry_run, bool verbose) {
+    public int run() {
         var reader = new DirectoryReader();
         var builder = new AutostartInfoBuilder(desktop_name);
         var launcher = new ProgramLauncher(dry_run);
@@ -50,11 +53,9 @@ class App {
 
 public int main(string[] args)
 {
-    bool dry_run = false;
     string desktop = "Openbox";
+    bool dry_run = false;
     bool verbose= false;
-
-    message("%s", Config.VERSION);
 
     GLib.Intl.setlocale(GLib.LocaleCategory.ALL, "");
     GLib.Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
@@ -90,7 +91,7 @@ public int main(string[] args)
             GLib.OptionEntry ()
         };
 
-        var opt_context = new OptionContext(" - XDG autostart");
+        var opt_context = new OptionContext(@" - XDG autostart " + Config.VERSION);
         opt_context.set_help_enabled(true);
         opt_context.add_main_entries(options, null);
         opt_context.parse(ref args);
@@ -101,6 +102,12 @@ public int main(string[] args)
         return 1;
     }
 
-    return new App(desktop).run(dry_run, verbose);
+    var app = new App(desktop);
+
+    // Set up app options.
+    app.verbose = verbose;
+    app.dry_run = dry_run;
+
+    return app.run();
 }
 
