@@ -82,7 +82,7 @@ class AutostartInfoBuilder {
     public AutostartInfo build(string path) {
 
         AutostartInfo info = AutostartInfo() {
-            visibility = true,
+            visibility = false,
             filename = path
         };
 
