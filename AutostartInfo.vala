@@ -27,18 +27,11 @@ struct AutostartInfo {
     }
 
     public string to_string() {
-        StringBuilder sb = new StringBuilder();
-        if (filename != null) {
-            sb.append(@"$filename: ");
-        }
 
         if (is_launchable()) {
-            sb.append(@"'$executable' will be launched in $delay sec.");
-        }
-        else {
-            sb.append("ignored");
+            return (@"Will launch '$executable' in $delay sec. (from $filename).");
         }
 
-        return sb.str;
+        return (@"Ignored: $filename");
     }
 }
