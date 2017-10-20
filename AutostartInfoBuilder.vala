@@ -43,37 +43,63 @@ class AutostartInfoBuilder {
         }
     }
 
+    /**
+     * Returns the visibility of the desktop file
+     *
+     * Not visible if:
+     *  - it doesn't exists in OnlyShowIn list
+     *  - it exists in NotShowIn list
+     *
+     * @returns true if desktop file is visible, false otherwise.
+     */
     private bool get_visibility() {
-        /**
-         * An application is not visible if:
-         *  - it doesn't exists in OnlyShowIn list
-         *  - if it exists in NotShowIn list
-         *
-         * Overwise, it's visible.
-        */
-        if (keyfile.has_key(ENTRY, SHOWIN)) {
-            return find_desktop(SHOWIN, keyfile, desktop);
+        try {
+            if (keyfile.has_key(ENTRY, SHOWIN))
+                return find_desktop(SHOWIN, keyfile, desktop);
+        }
+        catch (KeyFileError error) {
+            warning("%s", error.message);
         }
 
-        if (keyfile.has_key(ENTRY, HIDEIN)) {
-            return !find_desktop(HIDEIN, keyfile, desktop);
+        try {
+            if (keyfile.has_key(ENTRY, HIDEIN))
+                return !find_desktop(HIDEIN, keyfile, desktop);
+        }
+        catch (KeyFileError error) {
+            warning("%s", error.message);
         }
 
         return true;
     }
 
+    /**
+     * Check if executable name exists or if TryExec condition is met
+     *
+     * @returns the executable name or null.
+     */
     private string? get_executable_name() {
-        if (tryexec_is_validated(keyfile)) {
-            return keyfile.get_string (ENTRY, "Exec");
+        try {
+            if (tryexec_is_validated(keyfile))
+                return keyfile.get_string (ENTRY, "Exec");
+        }
+        catch (KeyFileError error) {
+            warning("%s", error.message);
         }
 
         return null;
     }
 
+    /**
+     * @returns the delay in seconds before program has to be launched
+     */
     private int get_delay() {
-        // how many seconds should be spent before execution? (default: 0 )
-        if (keyfile.has_key(ENTRY, DELAY)) {
-            return keyfile.get_integer(ENTRY, DELAY);
+        try {
+            if (keyfile.has_key(ENTRY, DELAY)) {
+                return keyfile.get_integer(ENTRY, DELAY);
+            }
+        }
+        catch (KeyFileError error) {
+            warning("%s", error.message);
         }
 
         return 0;
@@ -95,17 +121,24 @@ class AutostartInfoBuilder {
         return info;
     }
 
-    // Check if the TryExec condition is satisfied
-    // If the condition doesn't exist, return true;
-    // If it exists, check if executable is in path and runnable
+    /*
+     * Check for TryExec condition.
+     *
+     * @returns false only if condition exists and executable not in path or not runnable.
+     */
     private bool tryexec_is_validated (KeyFile kf) {
-        if (kf.has_key(ENTRY, TRYEXEC)) {
-            string? tryexec = kf.get_string(ENTRY, TRYEXEC);
-            if (tryexec != null) {
-                if (Environment.find_program_in_path (tryexec) == null)  {
-                    return false;
+        try {
+            if (kf.has_key(ENTRY, TRYEXEC)) {
+                string? tryexec = kf.get_string(ENTRY, TRYEXEC);
+                if (tryexec != null) {
+                    if (Environment.find_program_in_path (tryexec) == null)  {
+                        return false;
+                    }
                 }
             }
+        }
+        catch (KeyFileError error) {
+            warning("%s", error.message);
         }
 
         return true;
@@ -115,11 +148,16 @@ class AutostartInfoBuilder {
     private bool find_desktop(string category, KeyFile kf, string desktop) {
         string[] show_list;
 
-        show_list = kf.get_string_list(ENTRY, category);
-        foreach (string de in show_list) {
-            if (de == desktop) {
-                return true;
+        try {
+            show_list = kf.get_string_list(ENTRY, category);
+            foreach (string de in show_list) {
+                if (de == desktop) {
+                    return true;
+                }
             }
+        }
+        catch (KeyFileError error) {
+            warning("%s", error.message);
         }
 
         return false;
