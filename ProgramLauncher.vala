@@ -37,10 +37,7 @@ class ProgramLauncher {
             if (x.delay == seconds) {
                 try {
                     if (dry_run) {
-                        message("Time: %d sec. - %s (filename: %s)",
-                            seconds,
-                            x.executable,
-                            x.filename);
+                        message("Time: %d sec. - %s", seconds, x.executable);
                     } else {
                         Process.spawn_command_line_async (x.executable);
                     }
