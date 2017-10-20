@@ -22,8 +22,23 @@ struct AutostartInfo {
     public int delay;
     public string executable;
 
-
     public bool is_launchable() {
         return visibility && executable != null;
+    }
+
+    public string to_string() {
+        StringBuilder sb = new StringBuilder();
+        if (filename != null) {
+            sb.append(@"$filename: ");
+        }
+
+        if (is_launchable()) {
+            sb.append(@"'$executable' will be launched in $delay sec.");
+        }
+        else {
+            sb.append("ignored");
+        }
+
+        return sb.str;
     }
 }

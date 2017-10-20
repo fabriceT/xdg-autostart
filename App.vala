@@ -28,7 +28,7 @@ class App {
         desktop_name = name;
     }
 
-    public int run(bool dry_run) {
+    public int run(bool dry_run, bool verbose) {
         var reader = new DirectoryReader();
         var builder = new AutostartInfoBuilder(desktop_name);
         var launcher = new ProgramLauncher(dry_run);
@@ -36,7 +36,11 @@ class App {
         reader.read_all();
 
         foreach(string filename in reader.getFiles()) {
-            launcher.add(builder.build(filename));
+            AutostartInfo info = builder.build(filename);
+            if (verbose) {
+                stdout.printf("%s\n", info.to_string());
+            }
+            launcher.add(info);
         }
 
         return launcher.launch();
@@ -48,6 +52,7 @@ public int main(string[] args)
 {
     bool dry_run = false;
     string desktop = "Openbox";
+    bool verbose= false;
 
     message("%s", Config.VERSION);
 
@@ -65,6 +70,14 @@ public int main(string[] args)
                 arg = GLib.OptionArg.NONE,
                 arg_data = &dry_run,
                 description = _("Perform a test."),
+                arg_description = null },
+            GLib.OptionEntry () {
+                long_name = "verbose",
+                short_name = 'v',
+                flags = 0,
+                arg = GLib.OptionArg.NONE,
+                arg_data = &verbose,
+                description = _("Display more informations."),
                 arg_description = null },
             GLib.OptionEntry () {
                 long_name = "desktop",
@@ -88,6 +101,6 @@ public int main(string[] args)
         return 1;
     }
 
-    return new App(desktop).run(dry_run);
+    return new App(desktop).run(dry_run, verbose);
 }
 
