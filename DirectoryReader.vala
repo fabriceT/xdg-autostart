@@ -31,7 +31,8 @@ class DirectoryReader {
     public void read_all() {
         foreach (string dir in Environment.get_system_config_dirs())
         {
-            read_from_dir(dir);
+
+            read_from_dir(Path.build_filename(dir, "autostart"));
         }
 
         read_from_dir(Environment.get_user_config_dir ());
@@ -42,17 +43,14 @@ class DirectoryReader {
     public void read_from_dir(string directory) {
         unowned string filename;
 
-        // TODO this should be in another function
-        string dir_path = Path.build_filename(directory, "autostart");
-
         try
         {
-            Dir d = Dir.open(dir_path, 0);
-            info(@"\nParsing $dir_path");
+            Dir d = Dir.open(directory, 0);
+            info(@"\nParsing $directory");
 
             while ((filename = d.read_name ()) != null) {
                 if (filename.has_suffix(".desktop")) {
-                    desktopFiles.replace(filename, Path.build_filename(dir_path, filename));
+                    desktopFiles.replace(filename, Path.build_filename(directory, filename));
                 }
             }
         }
