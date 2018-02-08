@@ -31,26 +31,27 @@ class DirectoryReader {
     public void read_all() {
         foreach (string dir in Environment.get_system_config_dirs())
         {
-
-            read_from_dir(Path.build_filename(dir, "autostart"));
+            read_from_config_dir(dir);
         }
 
-        read_from_dir(Environment.get_user_config_dir ());
+        read_from_config_dir(Environment.get_user_config_dir ());
     }
 
 
     // List all desktop file from directory, put names and fullpaths in the HashTable table
-    public void read_from_dir(string directory) {
+    public void read_from_config_dir(string config_dir) {
         unowned string filename;
+
+        var autostart_dir = Path.build_filename(config_dir, "autostart");
 
         try
         {
-            Dir d = Dir.open(directory, 0);
-            info(@"\nParsing $directory");
+            Dir d = Dir.open(autostart_dir, 0);
+            message(@"\nParsing $autostart_dir");
 
             while ((filename = d.read_name ()) != null) {
                 if (filename.has_suffix(".desktop")) {
-                    desktopFiles.replace(filename, Path.build_filename(directory, filename));
+                    desktopFiles.replace(filename, Path.build_filename(autostart_dir, filename));
                 }
             }
         }
