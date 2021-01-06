@@ -6,17 +6,26 @@ If you want to set your desktop name (e.g. KDE, XFCE, ROX...), then add it as a 
 
 Run `xdg-autostart --help` for more informations
 
-# xdg-autostart? But Openbox already starts programs automatically!
+## xdg-autostart? But Openbox already starts programs automatically!
 
 Yes, it does. Dana did a good job with openbox-autostart which launches openbox-xdg-autostart, a python script. But this script requires python-xdg
-library to run and, of course, python. The python-xdg dependency is sometimes missed by packagers, so Openbox may or may not start
-programs automatically. xdg-autostart runs with no extra dependency.
+library to run and, of course, python. The python-xdg dependency is sometimes missed by packagers, so Openbox may or may not start programs automatically. xdg-autostart runs with no extra dependency.
 
-# So why?
+## So, why?
 
-It was fun to code an autostart program, and it had to be included in an openbox session managment. You are free to use it or not. If you do
-then comment the line calling openbox-xdg-autostart in the /usr/lib/openbox/openbox-autostart file.
+It was fun to code an autostart program, and it had to be included in an openbox session managment. You are free to use it or not. If you do then comment the line calling openbox-xdg-autostart in the /usr/lib/openbox/openbox-autostart file.
 
-# Wait!
+## Wait!
 
 Hey wait! xdg-autostart can handle the "X-GNOME-Autostart-Delay" key, thus an application can wait until its time to pop up into your userspace. No more applications burst when starting your desktop session.
+
+## Build
+
+Xdg-autostart uses meson and ninja. It's easy to set up.
+
+        mkdir <directory>
+        cd <directory>
+        meson ..
+        nina.
+
+And voilà!
