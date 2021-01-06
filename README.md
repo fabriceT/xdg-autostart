@@ -26,6 +26,7 @@ Xdg-autostart uses meson and ninja. It's easy to set up.
         mkdir <directory>
         cd <directory>
         meson ..
-        nina.
+        ninja
 
-And voilà!
+
+And voilà! Program is now is <directory>/src.
