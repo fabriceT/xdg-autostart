@@ -29,4 +29,4 @@ Xdg-autostart uses meson and ninja. It's easy to set up.
         ninja
 
 
-And voilà! Program is now is <directory>/src.
+And voilà! Program is now in \<directory\>/src.
