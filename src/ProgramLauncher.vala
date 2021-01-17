@@ -1,5 +1,5 @@
 /*  xdg-autostart
-    Copyright (C) 2014-2017  Fabrice thiroux
+    Copyright (C) 2014-2021 Fabrice thiroux
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
