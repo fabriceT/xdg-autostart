@@ -26,38 +26,37 @@ class App {
     public bool verbose = false;
     public bool dry_run = false;
 
-    public App(string name) {
-        stdout.printf(@"Setting desktop name to $name\n");
+    public App (string name) {
+        stdout.printf (@"Setting desktop name to $name\n");
         desktop_name = name;
     }
 
-    public int run() {
-        var reader = new DirectoryReader();
-        var builder = new AutostartInfoBuilder(desktop_name);
-        var launcher = new ProgramLauncher(dry_run);
+    public int run () {
+        var reader = new DirectoryReader ();
+        var builder = new AutostartInfoBuilder (desktop_name);
+        var launcher = new ProgramLauncher (dry_run);
 
-        reader.read_all();
+        reader.read_all ();
 
-        foreach(string filename in reader.getFiles()) {
-            AutostartInfo info = builder.build(filename);
+        foreach (string filename in reader.get_files ()) {
+            AutostartInfo info = builder.build (filename);
             if (verbose) {
-                stdout.printf("%s\n", info.to_string());
+                stdout.printf ("%s\n", info.to_string ());
             }
-            launcher.add(info);
+            launcher.add (info);
         }
 
-        return launcher.launch();
+        return launcher.launch ();
     }
 }
 
 
-public int main(string[] args)
-{
+public int main (string[] args) {
     string desktop = "Openbox";
     bool dry_run = false;
     bool verbose= false;
 
-    GLib.Intl.setlocale(GLib.LocaleCategory.ALL, "");
+    GLib.Intl.setlocale (GLib.LocaleCategory.ALL, "");
     GLib.Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
     GLib.Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
     GLib.Intl.textdomain (Config.GETTEXT_PACKAGE);
@@ -90,25 +89,24 @@ public int main(string[] args)
         GLib.OptionEntry ()
     };
 
-    var opt_context = new OptionContext(@" - XDG autostart " + Config.VERSION);
-    opt_context.set_help_enabled(true);
-    opt_context.add_main_entries(options, null);
+    var opt_context = new OptionContext (" - XDG autostart " + Config.VERSION);
+    opt_context.set_help_enabled (true);
+    opt_context.add_main_entries (options, null);
 
     try {
-        opt_context.parse(ref args);
+        opt_context.parse (ref args);
     }
     catch (OptionError e) {
-        stdout.printf("error: %s\n", e.message);
-        stdout.printf("Run '%s --help' to view a full list of available command line pass_options\n", args[0]);
+        stdout.printf ("error: %s\n", e.message);
+        stdout.printf ("Run '%s --help' to view a full list of available command line pass_options\n", args[0]);
         return 1;
     }
 
-    var app = new App(desktop);
+    var app = new App (desktop);
 
     // Set up app options.
     app.verbose = verbose;
     app.dry_run = dry_run;
 
-    return app.run();
+    return app.run ();
 }
-

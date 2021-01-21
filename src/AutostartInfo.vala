@@ -22,13 +22,13 @@ struct AutostartInfo {
     public int delay;
     public string executable;
 
-    public bool is_launchable() {
+    public bool is_launchable () {
         return visibility && executable != null;
     }
 
-    public string to_string() {
+    public string to_string () {
 
-        if (is_launchable()) {
+        if (is_launchable ()) {
             return (@"Will launch '$executable' in $delay sec. (from $filename).");
         }
 
