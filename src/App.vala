@@ -62,38 +62,39 @@ public int main(string[] args)
     GLib.Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
     GLib.Intl.textdomain (Config.GETTEXT_PACKAGE);
 
-    try {
-        GLib.OptionEntry[] options = {
-            GLib.OptionEntry () {
-                long_name = "dry-run",
-                short_name = 'n',
-                flags = 0,
-                arg = GLib.OptionArg.NONE,
-                arg_data = &dry_run,
-                description = _("Perform a test."),
-                arg_description = null },
-            GLib.OptionEntry () {
-                long_name = "verbose",
-                short_name = 'v',
-                flags = 0,
-                arg = GLib.OptionArg.NONE,
-                arg_data = &verbose,
-                description = _("Display more informations."),
-                arg_description = null },
-            GLib.OptionEntry () {
-                long_name = "desktop",
-                short_name = 'd',
-                flags = 0,
-                arg = GLib.OptionArg.STRING,
-                arg_data = &desktop,
-                description = _("Desktop name"),
-                arg_description = null },
-            GLib.OptionEntry ()
-        };
+    GLib.OptionEntry[] options = {
+        GLib.OptionEntry () {
+            long_name = "dry-run",
+            short_name = 'n',
+            flags = 0,
+            arg = GLib.OptionArg.NONE,
+            arg_data = &dry_run,
+            description = _("Perform a test."),
+            arg_description = null },
+        GLib.OptionEntry () {
+            long_name = "verbose",
+            short_name = 'v',
+            flags = 0,
+            arg = GLib.OptionArg.NONE,
+            arg_data = &verbose,
+            description = _("Display more informations."),
+            arg_description = null },
+        GLib.OptionEntry () {
+            long_name = "desktop",
+            short_name = 'd',
+            flags = 0,
+            arg = GLib.OptionArg.STRING,
+            arg_data = &desktop,
+            description = _("Desktop name"),
+            arg_description = null },
+        GLib.OptionEntry ()
+    };
 
-        var opt_context = new OptionContext(@" - XDG autostart " + Config.VERSION);
-        opt_context.set_help_enabled(true);
-        opt_context.add_main_entries(options, null);
+    var opt_context = new OptionContext(@" - XDG autostart " + Config.VERSION);
+    opt_context.set_help_enabled(true);
+    opt_context.add_main_entries(options, null);
+
+    try {
         opt_context.parse(ref args);
     }
     catch (OptionError e) {
