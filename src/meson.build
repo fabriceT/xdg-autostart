@@ -13,5 +13,6 @@ executable('xdg-autostart',
   src,
   config_data,
   dependencies: [glib, gobject],
-  include_directories : config_dir
+  include_directories: config_dir,
+  install: true
 )
